@@ -1,0 +1,157 @@
+<div class="p-6 max-w-6xl mx-auto">
+  <!-- Titulo y descripcion del MODULO NUEVO DE VENTAS -->
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-stone-800 flex items-center gap-2">
+      🛍️ Módulo de Ventas Automatizado
+    </h2>
+    <p class="text-sm text-stone-500">
+      Este punto de venta modular procesa transacciones directas invocando al store procedure en FastAPI, deduciendo ingredientes recursivamente.
+    </p>
+  </div>
+
+  <!-- Alertas de estado en pantalla -->
+  <div *ngIf="successMessage" class="mb-5 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center justify-between animate-fade-in">
+    <div class="flex items-center gap-2">
+      <span class="text-lg">✅</span>
+      <span class="font-medium">{{ successMessage }}</span>
+    </div>
+    <button (click)="successMessage = ''" class="text-emerald-500 hover:text-emerald-700 font-bold px-2">×</button>
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-5 p-4 bg-red-50 border border-red-200 text-red-800 rounded-2xl flex items-center justify-between animate-fade-in">
+    <div class="flex items-center gap-2">
+      <span class="text-lg">❌</span>
+      <span class="font-medium">{{ errorMessage }}</span>
+    </div>
+    <button (click)="errorMessage = ''" class="text-red-500 hover:text-red-750 font-bold px-2">×</button>
+  </div>
+
+  <!-- Grid Principal (Seleccion vs Carrito) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    
+    <!-- LADO IZQUIERDO: SELECCIÓN DE PRODUCTOS CON BÚSQUEDA -->
+    <div class="lg:col-span-5 bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+      <h3 class="text-lg font-bold text-stone-800 mb-4 pb-2 border-b border-stone-150">
+        Búsqueda y Selección de Platos
+      </h3>
+
+      <div class="space-y-4">
+        <!-- Input de Búsqueda -->
+        <div>
+          <label class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5">
+            Filtrar Platos por Nombre o ID
+          </label>
+          <div class="relative">
+            <input type="text" [(ngModel)]="searchTerm" placeholder="Ej: Pizza, Lasagna..."
+              class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 text-stone-800 font-medium text-sm" />
+            <span *ngIf="searchTerm" (click)="searchTerm = ''" class="absolute right-3 top-2.5 cursor-pointer text-stone-400 hover:text-stone-600 text-sm">✖</span>
+          </div>
+        </div>
+
+        <!-- Selector de Platos -->
+        <div>
+          <label class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5">
+            Seleccionar Plato Final
+          </label>
+          <select [(ngModel)]="selectedPlatoId" name="platoId"
+            class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-white text-stone-800 font-medium text-sm">
+            <option value="" disabled selected>-- Elige un Plato Final --</option>
+            <option *ngFor="let p of platosFiltrados" [value]="p.id">
+              [{{p.id}}] {{ p.nombre }} - ${{ p.precio_venta | number:'1.2-2' }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Cantidad -->
+        <div>
+          <label class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5">
+            Cantidad de Unidades
+          </label>
+          <div class="flex gap-2">
+            <input type="number" [(ngModel)]="cantidadVenta" name="cantidad" min="1" step="1"
+              class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 text-stone-800 font-medium text-sm">
+            <button (click)="agregarAlCarrito()"
+              class="px-6 py-2.5 bg-red-600 hover:bg-red-750 text-white font-bold rounded-xl shadow-md transition duration-150 flex items-center gap-1.5 whitespace-nowrap text-xs uppercase tracking-wider">
+              <span>➕ Añadir</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla rapida de precios de platos filtrados -->
+      <div class="mt-8">
+        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Platos Disponibles en Stock</h4>
+        <div class="bg-stone-50 rounded-2xl p-4 max-h-60 overflow-y-auto divide-y divide-stone-200 border border-stone-100">
+          <div *ngFor="let p of platosFiltrados" class="py-2.5 flex justify-between items-center text-sm">
+            <div class="flex flex-col">
+              <span class="font-bold text-stone-700">{{ p.nombre }}</span>
+              <span class="text-xs text-stone-400 font-mono">Stock actual: {{ p.stock_actual }} {{ p.unidad_medida }}</span>
+            </div>
+            <span class="font-bold text-red-600 font-mono">${{ p.precio_venta | number:'1.2-2' }}</span>
+          </div>
+          <p *ngIf="platosFiltrados.length === 0" class="text-xs text-stone-400 text-center py-2">No se encontraron platos con el filtro actual.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LADO DERECHO: DETALLE DEL CARRITO / FACTURACION -->
+    <div class="lg:col-span-7 bg-stone-900 text-white border border-stone-800 rounded-2xl p-6 shadow-md flex flex-col justify-between min-h-[450px]">
+      <div>
+        <div class="flex justify-between items-center mb-4 pb-2 border-b border-stone-800">
+          <h3 class="text-lg font-bold text-stone-100 flex items-center gap-2">
+            🛒 Resumen del Comprobante
+          </h3>
+          <button (click)="vaciarCarrito()" [disabled]="carrito.length === 0"
+            class="text-xs text-red-400 hover:text-red-300 font-bold disabled:opacity-50 transition uppercase tracking-wider">
+            Vaciar Todo
+          </button>
+        </div>
+
+        <!-- Tabla de Items en Carrito -->
+        <div class="overflow-y-auto max-h-[280px] divide-y divide-stone-800 pr-1">
+          <div *ngFor="let item of carrito; let idx = index" class="py-4 flex justify-between items-center gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-stone-100 text-sm">{{ item.plato.nombre }}</span>
+                <span class="px-2 py-0.5 bg-stone-800 text-stone-400 rounded text-[10px] font-mono">ID {{ item.plato.id }}</span>
+              </div>
+              <div class="text-xs text-stone-400 mt-1">
+                {{ item.cantidad }} u &times; ${{ item.plato.precio_venta | number:'1.2-2' }}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <span class="font-bold text-emerald-400 font-mono text-sm">${{ item.subtotal | number:'1.2-2' }}</span>
+              <button (click)="eliminarDelCarrito(idx)" class="text-stone-500 hover:text-red-400 transition text-lg">&times;</button>
+            </div>
+          </div>
+
+          <!-- Carrito Vacío -->
+          <div *ngIf="carrito.length === 0" class="py-12 text-center text-stone-500 flex flex-col items-center gap-2">
+            <span class="text-3xl">🗳️</span>
+            <p class="text-sm font-bold text-stone-400">Orden en blanco</p>
+            <p class="text-xs text-stone-600 max-w-xs">Busca y agrega artículos del menú a la izquierda para armar el pedido actual.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Totales y envio transaccional -->
+      <div class="pt-6 border-t border-stone-800 mt-6 bg-stone-900">
+        <div class="flex justify-between items-center mb-6">
+          <span class="text-stone-400 text-xs font-bold uppercase tracking-wider">Total de Venta</span>
+          <span class="text-3xl font-black text-emerald-400 font-mono">${{ totalFacturado | number:'1.2-2' }}</span>
+        </div>
+
+        <button (click)="confirmarVenta()" [disabled]="carrito.length === 0 || isLoading"
+          class="w-full py-3.5 bg-red-600 hover:bg-red-750 text-white font-bold rounded-xl shadow-md transition duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-widest cursor-pointer">
+          <span *ngIf="isLoading" class="animate-spin text-lg">🔄</span>
+          <span>🚀 Confirmar Venta</span>
+        </button>
+        <p class="text-center text-[10px] text-stone-500 mt-3.5">
+          Esta operación invoca de manera segura transacciones SQL integrales con las fórmulas BOM registradas.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

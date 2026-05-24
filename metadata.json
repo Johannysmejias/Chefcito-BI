@@ -1,0 +1,6 @@
+{
+  "name": "Pizzeria Gestion BOM",
+  "description": "Sistema de Gestion de Inventario (BOM) para Pizzeria, incluyendo To-Do de Cocina, Alertas de Materia Prima, Punto de Venta y Dashboard con entregables FastAPI y Angular.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,118 @@
+<div class="flex h-screen bg-stone-50 overflow-hidden font-sans">
+
+  <!-- =======================================================
+      SIDEBAR - MODERN LIGHT BEIGE & STONE DESIGN
+      ======================================================= -->
+  <aside class="w-64 bg-stone-100 border-r border-stone-200 flex flex-col shadow-lg shrink-0 select-none z-10">
+
+    <!-- Logo & Header -->
+    <div class="p-6 flex items-center gap-3 border-b border-stone-200">
+      <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white shadow-md">
+        <!-- SVG Chef Hat Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M6 18V6a4 4 0 0 1 8 0v12" /><path d="M18 18V9a4 4 0 0 0-8 0v9" /><path d="M3 18h18" /><path d="M4 22h16" /></svg>
+      </div>
+      <span class="text-red-600 font-black text-xl tracking-tight italic">Chefcito</span>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar">
+
+      <!-- Cocina Component Button -->
+      <button
+        (click)="activeTab = 'cocina'"
+        [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+          (activeTab === 'cocina'
+            ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
+            : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path d="M6 18V6a4 4 0 0 1 8 0v12" /><path d="M18 18V9a4 4 0 0 0-8 0v9" /><path d="M3 18h18" /><path d="M4 22h16" /></svg>
+        <span>Cocina</span>
+      </button>
+
+      <!-- Panel Compras Button -->
+      <button
+        (click)="activeTab = 'compras'"
+        [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+          (activeTab === 'compras'
+            ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
+            : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg>
+        <span>Compras de insumos</span>
+      </button>
+
+      <!-- Punto de Venta Button -->
+      <button
+        (click)="activeTab = 'punto_venta'"
+        [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+          (activeTab === 'punto_venta'
+            ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
+            : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><line x1="12" x2="12" y1="2" y2="22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+        <span>Punto de Venta</span>
+      </button>
+
+      <!-- Dashboard Stock Button -->
+      <button
+        (click)="activeTab = 'dashboard'"
+        [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+          (activeTab === 'dashboard'
+            ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
+            : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
+        <span>Stock & Bitácora</span>
+      </button>
+
+    </nav>
+
+    <!-- Footer Status Banner -->
+    <div class="p-6 bg-stone-200/40 mt-auto shrink-0 border-t border-stone-200">
+      <div class="text-stone-500 text-[10px] uppercase tracking-wider font-extrabold max-w-full truncate">Entorno MySQL</div>
+      <div class="text-stone-800 font-mono text-[10px] mt-1 flex items-center gap-1.5 font-bold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+        <span>Online (InnoDB)</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =======================================================
+      MAIN PANEL VIEWPORT - CONTAINER FOR DYNAMIC SUB-COMPONENTS
+      ======================================================= -->
+  <main class="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar">
+
+    <!-- Top banner / navbar -->
+    <header class="bg-white border-b border-stone-200 px-8 py-4 flex items-center justify-between shadow-sm shrink-0">
+      <div>
+        <h1 class="text-sm font-black uppercase text-stone-400 tracking-wider">Sistema de Cocina & Ventas (MRP ERP)</h1>
+        <p class="text-xs text-stone-500 font-medium">Control atómico de Materia Prima y Bill of Materials (BOM)</p>
+      </div>
+    </header>
+
+    <!-- Scrollable Component Content Container -->
+    <div class="p-8 flex-1">
+
+      <!-- 1. Cocina Tab -->
+      <div *ngIf="activeTab === 'cocina'">
+        <app-produccion-cocina></app-produccion-cocina>
+      </div>
+
+      <!-- 2. Compras Tab -->
+      <div *ngIf="activeTab === 'compras'">
+        <app-panel-compras></app-panel-compras>
+      </div>
+
+      <!-- 3. Punto de Venta Tab -->
+      <div *ngIf="activeTab === 'punto_venta'">
+        <app-punto-venta></app-punto-venta>
+      </div>
+
+      <!-- 4. Dashboard Stock Tab -->
+      <div *ngIf="activeTab === 'dashboard'">
+        <app-dashboard-stock></app-dashboard-stock>
+      </div>
+
+    </div>
+  </main>
+</div>

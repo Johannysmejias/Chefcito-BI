@@ -1,0 +1,111 @@
+<div class="p-6 max-w-6xl mx-auto">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        🛒 Panel de Compras (Materia Prima)
+      </h2>
+      <p class="text-sm text-gray-500">
+        Control de insumos básicos y alertas de reabastecimiento en tiempo real.
+      </p>
+    </div>
+    <button (click)="cargarMateriasPrimas()" [disabled]="isLoading"
+      class="px-4 py-2 text-sm bg-indigo-50 border border-indigo-200 text-indigo-700 font-medium rounded-lg hover:bg-indigo-100 transition duration-150 flex items-center gap-2">
+      <span *ngIf="isLoading" class="animate-spin">🔄</span>
+      <span>Actualizar Insumos</span>
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span>❌</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+    <button (click)="errorMessage = ''" class="text-rose-500 hover:text-rose-700">×</button>
+  </div>
+
+  <!-- Contenedor General de Tabla -->
+  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50/70 border-b border-gray-200 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+            <th class="py-4 px-6">Código ID</th>
+            <th class="py-4 px-6">Nombre de Insumo</th>
+            <th class="py-4 px-6 text-right">Stock Actual</th>
+            <th class="py-4 px-6 text-right">Stock Mínimo</th>
+            <th class="py-4 px-6">Equivalente Unidad</th>
+            <th class="py-4 px-6 text-center">Estado Crítico</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-sm">
+          <tr *ngFor="let MP of materiasPrimas" 
+            [ngClass]="{
+              'bg-red-50 hover:bg-red-100/70 text-red-900 duration-150 transition-colors': isBajoMinimo(MP),
+              'hover:bg-gray-50/50 text-gray-700 duration-150 transition-colors': !isBajoMinimo(MP)
+            }">
+            
+            <!-- ID -->
+            <td class="py-4 px-6 font-mono text-xs font-semibold">
+              #{{ MP.id }}
+            </td>
+
+            <!-- Nombre -->
+            <td class="py-4 px-6">
+              <span class="font-semibold block">{{ MP.nombre }}</span>
+              <span class="text-xs text-gray-400">MATERIA_PRIMA</span>
+            </td>
+
+            <!-- Stock Actual -->
+            <td class="py-4 px-6 text-right font-medium" [ngClass]="{'text-red-700 font-bold': isBajoMinimo(MP)}">
+              {{ MP.stock_actual | number:'1.1-3' }}
+            </td>
+
+            <!-- Stock Mínimo -->
+            <td class="py-4 px-6 text-right text-gray-500 font-mono">
+              {{ MP.stock_minimo | number:'1.1-3' }}
+            </td>
+
+            <!-- Unidad de Medida -->
+            <td class="py-4 px-6">
+              <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium uppercase">
+                {{ MP.unidad_medida }}
+              </span>
+            </td>
+
+            <!-- Logica Visual de Alerta Directiva -->
+            <td class="py-4 px-6 text-center">
+              <span *ngIf="isBajoMinimo(MP)" 
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 border border-red-200 text-red-800 animate-pulse">
+                🚨 COMPRAR YA! (Faltan {{ (MP.stock_minimo - MP.stock_actual) | number:'1.1-3' }})
+              </span>
+              <span *ngIf="!isBajoMinimo(MP)" 
+                class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-800">
+                🟢 Suficiente
+              </span>
+            </td>
+          </tr>
+
+          <!-- Estado de Carga -->
+          <tr *ngIf="isLoading">
+            <td colspan="6" class="py-12 text-center text-gray-400">
+              <span class="inline-block animate-spin mr-2">🔄</span> Cargando catálogo de compras...
+            </td>
+          </tr>
+
+          <!-- Lista Vacía -->
+          <tr *ngIf="!isLoading && materiasPrimas.length === 0">
+            <td colspan="6" class="py-12 text-center text-gray-500 font-medium">
+              No hay registradas materias primas en el sistema.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Footer Informativo -->
+    <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 text-xs text-gray-500 flex justify-between items-center">
+      <span>Total de insumos listados: <strong>{{ materiasPrimas.length }}</strong></span>
+      <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Filas coloreadas indican existencias bajo stock mínimo prudencial</span>
+    </div>
+  </div>
+</div>
