@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProduccionCocinaComponent } from './components/produccion-cocina/produccion-cocina.component';
 import { PanelComprasComponent } from './components/panel-compras/panel-compras.component';
@@ -19,5 +19,13 @@ import { DashboardStockComponent } from './components/dashboard-stock/dashboard-
   styleUrls: ['./app.css']
 })
 export class App {
-  activeTab: 'cocina' | 'compras' | 'punto_venta' | 'dashboard' = 'cocina';
+  activeTab: string = 'dashboard';
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+
+  cambiarTab(tabName: string): void {
+    this.activeTab = tabName;
+    this.cdr.detectChanges();
+  }
 }

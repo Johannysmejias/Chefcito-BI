@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http'; // <-- Agregado HttpHeaders acá
 import { Observable } from 'rxjs';
 
 export interface Articulo {
@@ -69,7 +69,12 @@ export interface VentaLog {
 })
 export class ArticuloService {
   // Ajustar URL segun el entorno de despliegue
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = 'https://trend-sermon-slander.ngrok-free.dev/api';
+
+  // Configuración de la cabecera para evitar la pantalla de Ngrok
+  private headers = new HttpHeaders({
+    'ngrok-skip-browser-warning': 'true'
+  });
 
   constructor(private http: HttpClient) {}
 
@@ -77,55 +82,60 @@ export class ArticuloService {
    * Obtiene los articulos de cocina de tipo SEMI_ELABORADO con stock < stock_minimo
    */
   getArticulosCocina(): Observable<Articulo[]> {
-    return this.http.get<Articulo[]>(`${this.apiUrl}/articulos/cocina`);
+    return this.http.get<Articulo[]>(`${this.apiUrl}/articulos/cocina`, { headers: this.headers });
   }
 
   /**
    * Registra produccion cocinada para un articulo SEMI_ELABORADO
    */
   registrarProduccion(req: ProduccionRequest): Observable<ProduccionResponse> {
-    return this.http.post<ProduccionResponse>(`${this.apiUrl}/produccion`, req);
+    return this.http.post<ProduccionResponse>(`${this.apiUrl}/produccion`, req, { headers: this.headers });
   }
+
+  registrarCompraInsumo(materia_prima_id: number, cantidad: number): Observable<any> {
+  const req = { materia_prima_id, cantidad };
+  return this.http.post<any>(`${this.apiUrl}/compras`, req, { headers: this.headers });
+}
 
   /**
    * Obtiene todas las MATERIAS_PRIMAS para el Panel de Compras
    */
   getMateriasPrimas(): Observable<Articulo[]> {
-    return this.http.get<Articulo[]>(`${this.apiUrl}/articulos/materia_prima`);
+    return this.http.get<Articulo[]>(`${this.apiUrl}/articulos/materia_prima`, { headers: this.headers });
   }
 
   /**
    * Obtiene los PLATOS_FINALES para el Módulo de Punto de Venta
    */
   getPlatosFinales(): Observable<Articulo[]> {
-    return this.http.get<Articulo[]>(`${this.apiUrl}/articulos/plato_final`);
+    return this.http.get<Articulo[]>(`${this.apiUrl}/articulos/plato_final`, { headers: this.headers });
   }
 
   /**
    * Registra venta de platos e inserta detalles ejecutando el descargo del BOM
    */
   registrarVenta(req: VentaRequest): Observable<VentaResponse> {
-    return this.http.post<VentaResponse>(`${this.apiUrl}/ventas`, req);
+    return this.http.post<VentaResponse>(`${this.apiUrl}/ventas`, req, { headers: this.headers });
   }
 
   /**
    * Obtiene la planilla de inventario completo
    */
   getInventarioCompleto(): Observable<Articulo[]> {
-    return this.http.get<Articulo[]>(`${this.apiUrl}/dashboard/inventario`);
+    return this.http.get<Articulo[]>(`${this.apiUrl}/dashboard/inventario`, { headers: this.headers });
   }
 
   /**
    * Obtiene historial de logs de produccion de cocina
    */
   getHistorialProduccion(): Observable<ProduccionLog[]> {
-    return this.http.get<ProduccionLog[]>(`${this.apiUrl}/dashboard/historial-produccion`);
+    return this.http.get<ProduccionLog[]>(`${this.apiUrl}/dashboard/historial-produccion`, { headers: this.headers });
   }
 
   /**
    * Obtiene historial de logs de ventas
    */
   getHistorialVentas(): Observable<VentaLog[]> {
-    return this.http.get<VentaLog[]>(`${this.apiUrl}/dashboard/historial-ventas`);
+    return this.http.get<VentaLog[]>(`${this.apiUrl}/dashboard/historial-ventas`, { headers: this.headers });
   }
 }

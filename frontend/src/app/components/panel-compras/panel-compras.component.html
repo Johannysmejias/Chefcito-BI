@@ -13,7 +13,75 @@
       <span *ngIf="isLoading" class="animate-spin">🔄</span>
       <span>Actualizar Insumos</span>
     </button>
+    <button
+    (click)="abrirModalCompra()"
+    class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-2xl shadow-lg shadow-red-200 transition-all flex items-center gap-2 cursor-pointer text-sm">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+    Registrar Compra
+  </button>
+
   </div>
+
+  <div *ngIf="mostrarModal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+  <div class="bg-white rounded-3xl shadow-2xl border border-stone-200 w-full max-w-md overflow-hidden p-6 space-y-4">
+
+    <div class="flex justify-between items-center pb-2 border-b border-stone-100">
+      <h3 class="text-lg font-black text-stone-800 tracking-tight">Ingresar Insumos Comprados</h3>
+      <button (click)="cerrarModalCompra()" class="text-stone-400 hover:text-stone-600 cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-extrabold uppercase tracking-wider text-stone-500">Seleccionar Insumo / Materia Prima</label>
+        <select
+          [(ngModel)]="insumoSeleccionadoId"
+          class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-700 font-medium focus:outline-none focus:border-red-500 transition-colors"
+        >
+          <option [ngValue]="null" disabled selected>-- Seleccione un artículo --</option>
+          <option *ngFor="let item of materiasPrimas" [ngValue]="item.id">
+            {{ item.nombre }} (Actual: {{ item.stock_actual }} {{ item.unidad_medida }})
+          </option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-extrabold uppercase tracking-wider text-stone-500">Cantidad Comprada</label>
+        <input
+          type="number"
+          [(ngModel)]="cantidadComprada"
+          placeholder="Ej: 5.50"
+          min="0.01"
+          step="any"
+          class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2.5 text-stone-700 font-medium focus:outline-none focus:border-red-500 transition-colors"
+        />
+      </div>
+
+    </div>
+
+    <div class="flex items-center gap-3 pt-4 border-t border-stone-100 justify-end">
+      <button
+        (click)="cerrarModalCompra()"
+        [disabled]="isSaving"
+        class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 font-bold rounded-xl transition-all cursor-pointer text-sm"
+      >
+        Cancelar
+      </button>
+
+      <button
+        (click)="guardarCompra()"
+        [disabled]="isSaving"
+        class="px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-stone-300 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 text-sm"
+      >
+        <span *ngIf="isSaving" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+        {{ isSaving ? 'Guardando...' : 'Confirmar Ingreso' }}
+      </button>
+    </div>
+
+  </div>
+</div>
 
   <div *ngIf="errorMessage" class="mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg flex items-center justify-between">
     <div class="flex items-center gap-2">
@@ -38,12 +106,12 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 text-sm">
-          <tr *ngFor="let MP of materiasPrimas" 
+          <tr *ngFor="let MP of materiasPrimas"
             [ngClass]="{
               'bg-red-50 hover:bg-red-100/70 text-red-900 duration-150 transition-colors': isBajoMinimo(MP),
               'hover:bg-gray-50/50 text-gray-700 duration-150 transition-colors': !isBajoMinimo(MP)
             }">
-            
+
             <!-- ID -->
             <td class="py-4 px-6 font-mono text-xs font-semibold">
               #{{ MP.id }}
@@ -74,11 +142,11 @@
 
             <!-- Logica Visual de Alerta Directiva -->
             <td class="py-4 px-6 text-center">
-              <span *ngIf="isBajoMinimo(MP)" 
+              <span *ngIf="isBajoMinimo(MP)"
                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 border border-red-200 text-red-800 animate-pulse">
                 🚨 COMPRAR YA! (Faltan {{ (MP.stock_minimo - MP.stock_actual) | number:'1.1-3' }})
               </span>
-              <span *ngIf="!isBajoMinimo(MP)" 
+              <span *ngIf="!isBajoMinimo(MP)"
                 class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-800">
                 🟢 Suficiente
               </span>
@@ -101,7 +169,7 @@
         </tbody>
       </table>
     </div>
-    
+
     <!-- Footer Informativo -->
     <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 text-xs text-gray-500 flex justify-between items-center">
       <span>Total de insumos listados: <strong>{{ materiasPrimas.length }}</strong></span>

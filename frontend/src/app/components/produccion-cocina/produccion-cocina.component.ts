@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Articulo, ArticuloService } from '../../services/articulo.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-produccion-cocina',
@@ -21,7 +21,7 @@ export class ProduccionCocinaComponent implements OnInit {
   selectedArticulo: Articulo | null = null;
   cantidadAProducir = 1;
 
-  constructor(private articuloService: ArticuloService) {}
+  constructor(private articuloService: ArticuloService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.cargarPendientesCocina();
@@ -34,6 +34,7 @@ export class ProduccionCocinaComponent implements OnInit {
       next: (data) => {
         this.articulosBajos = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = 'No se pudieron cargar los pendientes de cocina.';
@@ -74,6 +75,7 @@ export class ProduccionCocinaComponent implements OnInit {
         this.cerrarModal();
         // Volver a cargar la lista de cocina desde el servidor
         this.cargarPendientesCocina();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = err.error?.detail || 'Error al registrar la produccion.';

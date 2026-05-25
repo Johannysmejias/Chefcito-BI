@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VentasService, Articulo, VentaRequest } from './ventas.service';
+import {ChangeDetectorRef } from '@angular/core';
 
 interface CartItem {
   plato: Articulo;
@@ -28,7 +29,7 @@ export class PuntoVentaComponent implements OnInit {
   selectedPlatoId: string = '';
   cantidadVenta = 1;
 
-  constructor(private ventasService: VentasService) {}
+  constructor(private ventasService: VentasService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.cargarPlatos();
@@ -43,6 +44,7 @@ export class PuntoVentaComponent implements OnInit {
       next: (data) => {
         this.platosDisponibles = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = 'No se pudieron recuperar las ofertas de PLATO_FINAL desde el servidor.';
@@ -60,7 +62,7 @@ export class PuntoVentaComponent implements OnInit {
       return this.platosDisponibles;
     }
     const term = this.searchTerm.toLowerCase();
-    return this.platosDisponibles.filter(p => 
+    return this.platosDisponibles.filter(p =>
       p.nombre.toLowerCase().includes(term) || p.id.toString().includes(term)
     );
   }
@@ -150,6 +152,7 @@ export class PuntoVentaComponent implements OnInit {
         this.successMessage = `¡Venta registrada con éxito bajo ID #${res.venta_id}! Costo total: $${res.total_venta.toFixed(2)}. Insumos descontados de la base de datos de manera atómica (BOM).`;
         this.carrito = []; // Vaciar el carrito tras el checkout exitoso
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = err.error?.detail || 'No se pudo culminar la venta por falta de stock preventivo (MySQL Transaccional).';

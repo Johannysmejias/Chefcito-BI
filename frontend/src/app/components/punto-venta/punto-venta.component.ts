@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Articulo, ArticuloService, VentaItem } from '../../services/articulo.service';
+import {ChangeDetectorRef } from '@angular/core'; // <-- Agregás ChangeDetectorRef
 
 interface CartItem {
   plato: Articulo;
@@ -27,7 +28,7 @@ export class PuntoVentaComponent implements OnInit {
   selectedPlatoId: string = '';
   cantidadVenta = 1;
 
-  constructor(private articuloService: ArticuloService) {}
+  constructor(private articuloService: ArticuloService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.cargarPlatos();
@@ -39,6 +40,7 @@ export class PuntoVentaComponent implements OnInit {
       next: (data) => {
         this.platosDisponibles = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = 'No se pudieron cargar los platos a la venta.';
@@ -120,6 +122,7 @@ export class PuntoVentaComponent implements OnInit {
         this.successMessage = `¡Venta procesada con éxito! ID de venta registrada: #${res.venta_id}. Total facturado: $${res.total_venta.toFixed(2)}`;
         this.carrito = []; // Vaciar carrito despues de la transaccion
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = err.error?.detail || 'Error de stock insuficiente o transaccion fallida al procesar la venta.';
