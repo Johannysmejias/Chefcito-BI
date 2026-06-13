@@ -28,7 +28,7 @@
 
   <!-- Grid Principal (Seleccion vs Carrito) -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-    
+
     <!-- LADO IZQUIERDO: SELECCIÓN DE PRODUCTOS -->
     <div class="lg:col-span-5 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-150">
@@ -44,12 +44,12 @@
           <select [(ngModel)]="selectedPlatoId" name="platoId"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 font-medium">
             <option value="" disabled selected>-- Elige un Artículo --</option>
+
             <option *ngFor="let p of platosDisponibles" [value]="p.id">
               {{ p.nombre }} - ${{ p.precio_venta | number:'1.2-2' }}
             </option>
           </select>
         </div>
-
         <!-- Cantidad -->
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">

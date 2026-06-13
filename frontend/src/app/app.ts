@@ -4,6 +4,7 @@ import { ProduccionCocinaComponent } from './components/produccion-cocina/produc
 import { PanelComprasComponent } from './components/panel-compras/panel-compras.component';
 import { PuntoVentaComponent } from './components/punto-venta/punto-venta.component';
 import { DashboardStockComponent } from './components/dashboard-stock/dashboard-stock.component';
+import { TurnoControlComponent } from './components/turno-control/turno-control';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,8 @@ import { DashboardStockComponent } from './components/dashboard-stock/dashboard-
     ProduccionCocinaComponent,
     PanelComprasComponent,
     PuntoVentaComponent,
-    DashboardStockComponent
+    DashboardStockComponent,
+    TurnoControlComponent
   ],
   templateUrl: './app.html',
   styleUrls: ['./app.css']

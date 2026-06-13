@@ -117,6 +117,9 @@ export class PuntoVentaComponent implements OnInit {
       }))
     };
 
+
+
+
     this.articuloService.registrarVenta(req).subscribe({
       next: (res) => {
         this.successMessage = `¡Venta procesada con éxito! ID de venta registrada: #${res.venta_id}. Total facturado: $${res.total_venta.toFixed(2)}`;
@@ -127,6 +130,7 @@ export class PuntoVentaComponent implements OnInit {
       error: (err) => {
         this.errorMessage = err.error?.detail || 'Error de stock insuficiente o transaccion fallida al procesar la venta.';
         this.isLoading = false;
+        this.cdr.detectChanges(); // <--- ¡Esta es la pieza que faltaba!
         console.error(err);
       }
     });

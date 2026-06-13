@@ -9,7 +9,13 @@
     <div class="p-6 flex items-center gap-3 border-b border-stone-200">
       <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white shadow-md">
         <!-- SVG Chef Hat Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M6 18V6a4 4 0 0 1 8 0v12" /><path d="M18 18V9a4 4 0 0 0-8 0v9" /><path d="M3 18h18" /><path d="M4 22h16" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+          <path d="M6 18V6a4 4 0 0 1 8 0v12" />
+          <path d="M18 18V9a4 4 0 0 0-8 0v9" />
+          <path d="M3 18h18" />
+          <path d="M4 22h16" />
+        </svg>
       </div>
       <span class="text-red-600 font-black text-xl tracking-tight italic">Chefcito</span>
     </div>
@@ -17,47 +23,41 @@
     <!-- Navigation Tabs -->
     <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar">
 
-  <button
-    (click)="cambiarTab('cocina')"
-    [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+      <button (click)="cambiarTab('cocina')" [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
       (activeTab === 'cocina'
         ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
-        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
-  >
-    <span>Cocina</span>
-  </button>
+        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')">
+        <span>Cocina</span>
+      </button>
 
-  <button
-    (click)="cambiarTab('compras')"
-    [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+      <button (click)="cambiarTab('compras')" [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
       (activeTab === 'compras'
         ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
-        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
-  >
-    <span>Compras de insumos</span>
-  </button>
+        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')">
+        <span>Compras de insumos</span>
+      </button>
 
-  <button
-    (click)="cambiarTab('punto_venta')"
-    [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+      <button (click)="cambiarTab('punto_venta')" [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
       (activeTab === 'punto_venta'
         ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
-        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
-  >
-    <span>Punto de Venta</span>
-  </button>
+        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')">
+        <span>Punto de Venta</span>
+      </button>
 
-  <button
-    (click)="cambiarTab('dashboard')"
-    [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+      <button (click)="cambiarTab('dashboard')" [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
       (activeTab === 'dashboard'
         ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
-        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')"
-  >
-    <span>Stock & Bitácora</span>
-  </button>
+        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')">
+        <span>Stock & Bitácora</span>
+      </button>
+      <button (click)="cambiarTab('Turno')" [class]="'w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all text-left cursor-pointer ' +
+      (activeTab === 'Turno'
+        ? 'bg-red-600 text-white shadow-lg shadow-red-200/50'
+        : 'text-stone-600 hover:bg-stone-200/60 hover:text-stone-900')">
+        <span>Turno</span>
+      </button>
 
-</nav>
+    </nav>
 
   </aside>
 
@@ -67,12 +67,10 @@
   <main class="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar">
 
     <!-- Top banner / navbar -->
-    <header class="bg-white border-b border-stone-200 px-8 py-4 flex items-center justify-between shadow-sm shrink-0">
-      <div>
-        <h1 class="text-sm font-black uppercase text-stone-400 tracking-wider">Sistema de Cocina & Ventas (MRP ERP)</h1>
-        <p class="text-xs text-stone-500 font-medium">Control atómico de Materia Prima y Bill of Materials (BOM)</p>
-      </div>
-    </header>
+    <div class="bg-white border-b border-stone-200 p-4 flex items-center justify-between">
+      <h1 class="text-xl font-bold text-gray-800">Panel de Control Principal</h1>
+      <span class="text-sm text-gray-400 italic">Bienvenido 👨‍🍳</span>
+    </div>
 
     <!-- Scrollable Component Content Container -->
     <div class="p-8 flex-1">
@@ -95,6 +93,11 @@
       <!-- 4. Dashboard Stock Tab -->
       <div *ngIf="activeTab === 'dashboard'">
         <app-dashboard-stock></app-dashboard-stock>
+      </div>
+
+      <!-- 5. Turno Tab -->
+      <div *ngIf="activeTab === 'Turno'">
+        <app-turno-control></app-turno-control>
       </div>
 
     </div>
