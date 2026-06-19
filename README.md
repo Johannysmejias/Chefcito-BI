@@ -1,6 +1,6 @@
-# 🍕 Pizzeria Gestión BOM
+# 🍕 Chefcito BI
 
-Sistema de gestión integral para pizzerías basado en **lista de materiales (BOM — _Bill of Materials_)**. Cada venta o producción descuenta automáticamente las materias primas del inventario siguiendo la receta del producto, manteniendo el stock siempre sincronizado en tiempo real.
+Sistema de gestión integral para locales gastronómicos basado en **lista de materiales (BOM — _Bill of Materials_)**. Cada venta o producción descuenta automáticamente las materias primas del inventario siguiendo la receta del producto, manteniendo el stock siempre sincronizado en tiempo real.
 
 El sistema cubre todo el ciclo operativo de un local: control de stock, producción de cocina, compras, punto de venta, plano de mesas con cuentas abiertas, control de turnos y reportes de gestión.
 
