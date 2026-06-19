@@ -5,7 +5,7 @@
       🏪 Facturación & Punto de Venta (POS)
     </h2>
     <p class="text-sm text-gray-500">
-      Módulo para registrar ventas directas de PLATOS FINALES. Al emitir, se descuenta de forma automatizada (BOM) el stock dependiente.
+      Para pedidos de salón, abrí la mesa desde el <strong>Plano de Mesas</strong>. Acá también podés registrar pedidos para llevar o delivery.
     </p>
   </div>
 
@@ -26,120 +26,251 @@
     <button (click)="errorMessage = ''" class="text-orange-500 hover:text-orange-700">×</button>
   </div>
 
-  <!-- Grid Principal (Seleccion vs Carrito) -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+  <!-- =======================================================
+       PASO 1: SIN MODO ELEGIDO TODAVÍA
+       ======================================================= -->
+  <div *ngIf="!modo" class="bg-white border border-gray-200 rounded-xl p-10 shadow-sm text-center max-w-xl mx-auto">
+    <p class="text-gray-500 font-medium mb-6">¿Qué tipo de pedido vas a registrar?</p>
+    <div class="grid grid-cols-2 gap-4">
+      <button (click)="elegirModo('take_away')"
+        class="py-6 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-xl font-bold text-amber-700 transition flex flex-col items-center gap-2">
+        <span class="text-3xl">🥡</span>
+        Take Away
+      </button>
+      <button (click)="elegirModo('delivery')"
+        class="py-6 bg-sky-50 hover:bg-sky-100 border-2 border-sky-200 rounded-xl font-bold text-sky-700 transition flex flex-col items-center gap-2">
+        <span class="text-3xl">🛵</span>
+        Delivery
+      </button>
+    </div>
+    <p class="text-xs text-gray-400 mt-6">
+      Para pedidos en el salón, tocá la mesa correspondiente en el <strong>Plano de Mesas</strong>.
+    </p>
+  </div>
 
-    <!-- LADO IZQUIERDO: SELECCIÓN DE PRODUCTOS -->
-    <div class="lg:col-span-5 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-      <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-150">
-        Agregar Artículo al Pedido
+  <!-- =======================================================
+       PASO 1b: ABRIENDO LA CUENTA DE LA MESA (esperando al backend)
+       ======================================================= -->
+  <div *ngIf="modo === 'mesa' && isLoadingMesa" class="text-center text-gray-400 py-16">
+    Abriendo cuenta de la mesa...
+  </div>
+
+  <!-- =======================================================
+       PASO 2: ARMADO DEL PEDIDO (mesa con cuenta / take away / delivery)
+       ======================================================= -->
+  <div *ngIf="modo && !(modo === 'mesa' && isLoadingMesa) && (modo !== 'mesa' || cuentaActual)">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+        <ng-container *ngIf="modo === 'mesa'">
+          Mesa {{ mesaSeleccionada?.etiqueta_visible }}
+          <span class="text-xs font-semibold uppercase tracking-wide text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full">Cuenta abierta</span>
+        </ng-container>
+        <ng-container *ngIf="modo === 'take_away'">🥡 Pedido Take Away</ng-container>
+        <ng-container *ngIf="modo === 'delivery'">🛵 Pedido Delivery</ng-container>
       </h3>
+      <button (click)="volverAlInicio()" class="text-sm font-semibold text-gray-500 hover:text-gray-800">
+        ← Volver
+      </button>
+    </div>
 
-      <form (submit)="$event.preventDefault(); agregarAlCarrito()" class="space-y-4">
-        <!-- Selector de Platos -->
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
-            Plato Final a Vender
-          </label>
-          <select [(ngModel)]="selectedPlatoId" name="platoId"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 font-medium">
-            <option value="" disabled selected>-- Elige un Artículo --</option>
+    <!-- Grid Principal (Seleccion vs Carrito) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <option *ngFor="let p of platosDisponibles" [value]="p.id">
-              {{ p.nombre }} - ${{ p.precio_venta | number:'1.2-2' }}
-            </option>
-          </select>
+      <!-- LADO IZQUIERDO: SELECCIÓN DE PRODUCTOS (igual para los 3 modos) -->
+      <div class="lg:col-span-5 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-150">
+          Agregar Artículo al Pedido
+        </h3>
+
+        <form (submit)="$event.preventDefault(); agregarAlCarrito()" class="space-y-4">
+          <!-- Selector de Platos -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+              Plato Final a Vender
+            </label>
+            <select [(ngModel)]="selectedPlatoId" name="platoId"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800 font-medium">
+              <option value="" disabled selected>-- Elige un Artículo --</option>
+
+              <option *ngFor="let p of platosDisponibles" [value]="p.id">
+                {{ p.nombre }} - ${{ p.precio_venta | number:'1.2-2' }}
+              </option>
+            </select>
+          </div>
+          <!-- Cantidad -->
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+              Cantidad Solicitada
+            </label>
+            <div class="flex gap-2">
+              <input type="number" [(ngModel)]="cantidadVenta" name="cantidad" min="1" step="1"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 font-medium">
+              <button type="submit"
+                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition duration-150 flex items-center gap-1.5 whitespace-nowrap">
+                <span>➕ Agregar</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Tabla rapida de precios de referencia -->
+        <div class="mt-8">
+          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Lista de Precios del Menú</h4>
+          <div class="bg-gray-50 rounded-xl p-4 max-h-60 overflow-y-auto divide-y divide-gray-200 border border-gray-100">
+            <div *ngFor="let p of platosDisponibles" class="py-2.5 flex justify-between items-center text-sm">
+              <div class="flex flex-col">
+                <span class="font-semibold text-gray-700">{{ p.nombre }}</span>
+                <span class="text-xs text-gray-400">Stock disponible: {{ p.stock_actual }} {{ p.unidad_medida }}</span>
+              </div>
+              <span class="font-bold text-indigo-600 font-mono">${{ p.precio_venta | number:'1.2-2' }}</span>
+            </div>
+            <p *ngIf="platosDisponibles.length === 0" class="text-xs text-gray-400 text-center py-2">Cargando menú...</p>
+          </div>
         </div>
-        <!-- Cantidad -->
+      </div>
+
+      <!-- LADO DERECHO (modo = mesa): CUENTA ABIERTA -->
+      <div *ngIf="modo === 'mesa' && cuentaActual" class="lg:col-span-7 bg-gray-900 text-white border border-gray-800 rounded-xl p-6 shadow-md flex flex-col justify-between min-h-[450px]">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
-            Cantidad Solicitada
-          </label>
-          <div class="flex gap-2">
-            <input type="number" [(ngModel)]="cantidadVenta" name="cantidad" min="1" step="1"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 font-medium">
-            <button type="submit"
-              class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition duration-150 flex items-center gap-1.5 whitespace-nowrap">
-              <span>➕ Agregar</span>
+          <!-- Items ya enviados / cobrados de esta cuenta -->
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-800">
+            <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+              📋 Ya pedido en esta mesa
+            </h3>
+          </div>
+
+          <div class="overflow-y-auto max-h-[160px] divide-y divide-gray-800 pr-1 mb-5">
+            <div *ngFor="let item of cuentaActual.items" class="py-2.5 flex justify-between items-center gap-4 text-sm">
+              <span class="text-gray-200">{{ item.cantidad }} × {{ item.plato_nombre }}</span>
+              <span class="font-mono text-gray-400">${{ item.subtotal | number:'1.2-2' }}</span>
+            </div>
+            <p *ngIf="cuentaActual.items.length === 0" class="py-3 text-xs text-gray-500">Todavía no se envió ningún pedido a esta mesa.</p>
+          </div>
+
+          <!-- Carrito de la ronda actual (sin enviar) -->
+          <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-800">
+            <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+              🛒 Pedido nuevo (sin enviar)
+            </h3>
+            <button (click)="vaciarCarrito()" [disabled]="carrito.length === 0"
+              class="text-xs text-rose-400 hover:text-rose-300 font-semibold disabled:opacity-50 transition">
+              Vaciar
             </button>
           </div>
-        </div>
-      </form>
 
-      <!-- Tabla rapida de precios de referencia -->
-      <div class="mt-8">
-        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Lista de Precios del Menú</h4>
-        <div class="bg-gray-50 rounded-xl p-4 max-h-60 overflow-y-auto divide-y divide-gray-200 border border-gray-100">
-          <div *ngFor="let p of platosDisponibles" class="py-2.5 flex justify-between items-center text-sm">
-            <div class="flex flex-col">
-              <span class="font-semibold text-gray-700">{{ p.nombre }}</span>
-              <span class="text-xs text-gray-400">Stock disponible: {{ p.stock_actual }} {{ p.unidad_medida }}</span>
+          <div class="overflow-y-auto max-h-[220px] divide-y divide-gray-800 pr-1">
+            <div *ngFor="let item of carrito; let idx = index" class="py-4 flex justify-between items-center gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-gray-100">{{ item.plato.nombre }}</span>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">
+                  {{ item.cantidad }} unidad(es) &times; ${{ item.plato.precio_venta | number:'1.2-2' }}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <span class="font-bold text-emerald-400 font-mono">${{ item.subtotal | number:'1.2-2' }}</span>
+                <button (click)="eliminarDelCarrito(idx)" class="text-gray-500 hover:text-rose-400 transition text-lg">&times;</button>
+              </div>
             </div>
-            <span class="font-bold text-indigo-600 font-mono">${{ p.precio_venta | number:'1.2-2' }}</span>
+
+            <!-- Carrito Vacío -->
+            <div *ngIf="carrito.length === 0" class="py-8 text-center text-gray-500 flex flex-col items-center gap-2">
+              <span class="text-3xl">🗳️</span>
+              <p class="text-sm font-medium text-gray-400">Todavía no agregaste platos a esta ronda.</p>
+            </div>
           </div>
-          <p *ngIf="platosDisponibles.length === 0" class="text-xs text-gray-400 text-center py-2">Cargando menú...</p>
+        </div>
+
+        <!-- Totales y acciones -->
+        <div class="pt-6 border-t border-gray-800 mt-6 bg-gray-900">
+          <div class="flex justify-between items-center mb-1 text-sm text-gray-400">
+            <span>Ya pedido</span>
+            <span class="font-mono">${{ cuentaActual.total | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between items-center mb-4 text-sm text-gray-400">
+            <span>Pedido nuevo</span>
+            <span class="font-mono">${{ totalCarrito | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between items-center mb-6">
+            <span class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Total Cuenta</span>
+            <span class="text-3xl font-extrabold text-emerald-400 font-mono">${{ totalCuenta | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button (click)="enviarPedido()" [disabled]="carrito.length === 0 || isLoading"
+              class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-md transition duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span *ngIf="isLoading" class="animate-spin text-lg">🔄</span>
+              <span class="text-base">🍽️ Enviar Pedido</span>
+            </button>
+
+            <button (click)="cobrarCuenta()" [disabled]="carrito.length > 0 || cuentaActual.items.length === 0 || isLoading"
+              class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span *ngIf="isLoading" class="animate-spin text-lg">🔄</span>
+              <span class="text-base">💵 Cobrar y Cerrar Mesa</span>
+            </button>
+          </div>
+          <p *ngIf="carrito.length > 0" class="text-center text-[11px] text-amber-400 mt-3">
+            Enviá el pedido antes de cobrar la mesa.
+          </p>
         </div>
       </div>
-    </div>
 
-    <!-- LADO DERECHO: DETALLE DEL CARRITO / FACTURACION -->
-    <div class="lg:col-span-7 bg-gray-900 text-white border border-gray-800 rounded-xl p-6 shadow-md flex flex-col justify-between min-h-[450px]">
-      <div>
-        <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-800">
-          <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
-            🛒 Resumen del Comprobante
-          </h3>
-          <button (click)="vaciarCarrito()" [disabled]="carrito.length === 0"
-            class="text-xs text-rose-400 hover:text-rose-300 font-semibold disabled:opacity-50 transition">
-            Vaciar Carrito
+      <!-- LADO DERECHO (modo = take away / delivery): VENTA DIRECTA -->
+      <div *ngIf="modo === 'take_away' || modo === 'delivery'" class="lg:col-span-7 bg-gray-900 text-white border border-gray-800 rounded-xl p-6 shadow-md flex flex-col justify-between min-h-[450px]">
+        <div>
+          <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-800">
+            <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+              🛒 Resumen del Pedido
+            </h3>
+            <button (click)="vaciarCarrito()" [disabled]="carrito.length === 0"
+              class="text-xs text-rose-400 hover:text-rose-300 font-semibold disabled:opacity-50 transition">
+              Vaciar Carrito
+            </button>
+          </div>
+
+          <div class="overflow-y-auto max-h-[280px] divide-y divide-gray-800 pr-1">
+            <div *ngFor="let item of carrito; let idx = index" class="py-4 flex justify-between items-center gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-gray-100">{{ item.plato.nombre }}</span>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">
+                  {{ item.cantidad }} unidad(es) &times; ${{ item.plato.precio_venta | number:'1.2-2' }}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <span class="font-bold text-emerald-400 font-mono">${{ item.subtotal | number:'1.2-2' }}</span>
+                <button (click)="eliminarDelCarrito(idx)" class="text-gray-500 hover:text-rose-400 transition text-lg">&times;</button>
+              </div>
+            </div>
+
+            <!-- Carrito Vacío -->
+            <div *ngIf="carrito.length === 0" class="py-12 text-center text-gray-500 flex flex-col items-center gap-2">
+              <span class="text-3xl">🗳️</span>
+              <p class="text-sm font-medium text-gray-400">Su carrito está vacío</p>
+              <p class="text-xs text-gray-600 max-w-xs">Seleccione artículos e indíquele la cantidad a despachar a su izquierda.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Totales y envio transaccional -->
+        <div class="pt-6 border-t border-gray-800 mt-6 bg-gray-900">
+          <div class="flex justify-between items-center mb-6">
+            <span class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Total Final</span>
+            <span class="text-3xl font-extrabold text-emerald-400 font-mono">${{ totalCarrito | number:'1.2-2' }}</span>
+          </div>
+
+          <button (click)="confirmarVentaDirecta()" [disabled]="carrito.length === 0 || isLoading"
+            class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span *ngIf="isLoading" class="animate-spin text-lg">🔄</span>
+            <span class="text-base">🚀 Confirmar Venta</span>
           </button>
         </div>
-
-        <!-- Tabla de Items en Carrito -->
-        <div class="overflow-y-auto max-h-[280px] divide-y divide-gray-800 pr-1">
-          <div *ngFor="let item of carrito; let idx = index" class="py-4 flex justify-between items-center gap-4">
-            <div class="flex-1">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-gray-100">{{ item.plato.nombre }}</span>
-                <span class="px-2 py-0.5 bg-gray-800 text-gray-400 rounded text-xs font-mono">ID {{ item.plato.id }}</span>
-              </div>
-              <div class="text-xs text-gray-400 mt-1">
-                {{ item.cantidad }} unidad(es) &times; ${{ item.plato.precio_venta | number:'1.2-2' }}
-              </div>
-            </div>
-
-            <div class="flex items-center gap-4">
-              <span class="font-bold text-emerald-400 font-mono">${{ item.subtotal | number:'1.2-2' }}</span>
-              <button (click)="eliminarDelCarrito(idx)" class="text-gray-500 hover:text-rose-400 transition text-lg">&times;</button>
-            </div>
-          </div>
-
-          <!-- Carrito Vacío -->
-          <div *ngIf="carrito.length === 0" class="py-12 text-center text-gray-500 flex flex-col items-center gap-2">
-            <span class="text-3xl">🗳️</span>
-            <p class="text-sm font-medium text-gray-400">Su carrito está vacío</p>
-            <p class="text-xs text-gray-600 max-w-xs">Seleccione artículos e indíquele la cantidad a despachar a su izquierda.</p>
-          </div>
-        </div>
       </div>
 
-      <!-- Totales y envio transaccional -->
-      <div class="pt-6 border-t border-gray-800 mt-6 bg-gray-900">
-        <div class="flex justify-between items-center mb-6">
-          <span class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Total Final Factura</span>
-          <span class="text-3xl font-extrabold text-emerald-400 font-mono">${{ totalVenta | number:'1.2-2' }}</span>
-        </div>
-
-        <button (click)="confirmarVenta()" [disabled]="carrito.length === 0 || isLoading"
-          class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-          <span *ngIf="isLoading" class="animate-spin text-lg">🔄</span>
-          <span class="text-base">🚀 Confirmar Venta</span>
-        </button>
-        <p class="text-center text-[10px] text-gray-500 mt-3.5">
-          Esta operación se ejecuta en una sola transacción SQL invocando a <strong>registrar_venta_detalle</strong>. Realizará las validaciones del BOM correspondientes.
-        </p>
-      </div>
     </div>
-
   </div>
 </div>

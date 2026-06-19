@@ -36,6 +36,7 @@ export interface VentaItem {
 
 export interface VentaRequest {
   detalles: VentaItem[];
+  modalidad: 'take_away' | 'delivery';
 }
 
 export interface VentaResponse {

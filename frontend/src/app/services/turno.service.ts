@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -7,19 +7,22 @@ import { Observable } from 'rxjs';
 })
 export class TurnoService {
   // Recordá cambiar esto por tu URL activa de Ngrok en producción
-  private apiUrl = 'http://localhost:8000/api/turnos';
+  private apiUrl = 'https://trend-sermon-slander.ngrok-free.dev/api';
 
   constructor(private http: HttpClient) {}
+  private headers = new HttpHeaders({
+  'ngrok-skip-browser-warning': '69420' // Cualquier valor funciona para saltar la advertencia
+});
 
   getTurnoActual(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/actual`);
+    return this.http.get<any>(`${this.apiUrl}/turnos/actual`, { headers: this.headers });
   }
 
   abrirTurno(): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/abrir`, {});
+    return this.http.post<any>(`${this.apiUrl}/turnos/abrir`, {}, { headers: this.headers });
   }
 
   cerrarTurno(): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/cerrar`, {});
+    return this.http.post<any>(`${this.apiUrl}/turnos/cerrar`, {}, { headers: this.headers });
   }
 }

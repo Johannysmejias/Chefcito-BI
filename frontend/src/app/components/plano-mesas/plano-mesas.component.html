@@ -1,0 +1,58 @@
+<div class="panel-header">
+  <h2>Plano Interactivo de Mesas</h2>
+  <div class="header-actions">
+    <button class="btn-add" (click)="agregarMesa()">
+      <i class="fa fa-plus"></i> Agregar Mesa
+    </button>
+
+    <button class="btn-save" (click)="guardarDistribucion()">
+      <i class="fa fa-save"></i> Guardar Distribución
+    </button>
+  </div>
+</div>
+
+<div class="plano-leyenda">
+  <div class="leyenda-item"><span class="circulo bg-verde"></span> Libre</div>
+  <div class="leyenda-item"><span class="circulo bg-rojo anim-latido"></span> No Atendida</div>
+  <div class="leyenda-item"><span class="circulo bg-azul"></span> Atendida / Comiendo</div>
+  <div class="leyenda-item"><span class="circulo bg-amarillo"></span> Esperando Pago</div>
+  <div class="leyenda-item"><span class="circulo bg-gris"></span> Limpieza</div>
+</div>
+
+<div class="plano-container" cdkDropList>
+  <div class="piso-comedor" id="boundary">
+
+    <div
+      *ngFor="let mesa of mesas; trackBy: trackByMesa"
+      class="mesa-card"
+      [ngClass]="{
+        'fuera-servicio': !mesa.activa,
+        'card-verde': mesa.estado_actual === 'libre' || !mesa.estado_actual,
+        'card-rojo': mesa.estado_actual === 'no_atendida',
+        'card-azul': mesa.estado_actual === 'atendida',
+        'card-amarillo': mesa.estado_actual === 'esperando_pago',
+        'card-gris': mesa.estado_actual === 'limpieza',
+        'is-dragging': mesa.id_mesa === mesaArrastrandoId
+      }"
+      cdkDrag
+      cdkDragBoundary="#boundary"
+      [cdkDragData]="mesa"
+      [style.left.px]="mesa.pos_x"
+      [style.top.px]="mesa.pos_y"
+      (cdkDragStarted)="onDragStarted(mesa)"
+      (cdkDragEnded)="onDragEnded($event, mesa)"
+      (click)="onMesaClick(mesa)"
+      [title]="mesa.activa ? 'Click para cargar el pedido de esta mesa' : ''">
+
+      <button class="btn-eliminar" (click)="eliminarMesa($event, mesa)" title="Eliminar Mesa">
+        <i class="fa fa-times">X</i>
+      </button>
+
+      <div class="mesa-numero">
+        {{ obtenerNumeroMesa(mesa.etiqueta_visible) }}
+      </div>
+
+    </div>
+
+  </div>
+</div>

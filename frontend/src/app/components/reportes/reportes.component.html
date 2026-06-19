@@ -1,0 +1,138 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+      📊 Reportes Gerenciales
+    </h2>
+    <p class="text-sm text-gray-500">
+      Ocupación de mesas, performance por turno y mezcla de modalidades de venta.
+    </p>
+  </div>
+
+  <!-- =======================================================
+       KPIs EN VIVO (no dependen del filtro de fechas)
+       ======================================================= -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+      <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Ocupación Actual</div>
+      <div class="text-3xl font-extrabold text-indigo-600">{{ resumen?.porcentaje_ocupacion ?? 0 }}%</div>
+      <div class="text-xs text-gray-400 mt-1" *ngIf="resumen">
+        {{ resumen.mesas_ocupadas }} de {{ resumen.mesas_activas }} mesas ocupadas
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+      <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Ticket Promedio (último turno)</div>
+      <div class="text-3xl font-extrabold text-emerald-600">
+        ${{ (resumen?.ultimo_turno?.ticket_promedio ?? 0) | number:'1.2-2' }}
+      </div>
+      <div class="text-xs text-gray-400 mt-1" *ngIf="resumen?.ultimo_turno">
+        Turno #{{ resumen?.ultimo_turno?.turno_id }} ({{ resumen?.ultimo_turno?.estado }})
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+      <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Cantidad Vendida (último turno)</div>
+      <div class="text-3xl font-extrabold text-gray-800">{{ resumen?.ultimo_turno?.cantidad_platos_vendidos ?? 0 }}</div>
+      <div class="text-xs text-gray-400 mt-1">platos · {{ resumen?.ultimo_turno?.volumen_ventas ?? 0 }} tickets</div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+      <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Plato Estrella (último turno)</div>
+      <div class="text-xl font-extrabold text-amber-600 truncate">{{ resumen?.ultimo_turno?.plato_estrella ?? '—' }}</div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       FILTRO DE FECHAS
+       ======================================================= -->
+  <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm mb-8 flex flex-wrap items-end gap-4">
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Desde</label>
+      <input type="date" [(ngModel)]="desde" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Hasta</label>
+      <input type="date" [(ngModel)]="hasta" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+    </div>
+    <button (click)="aplicarFiltro()" [disabled]="isLoading"
+      class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition disabled:opacity-50">
+      {{ isLoading ? 'Cargando...' : 'Filtrar' }}
+    </button>
+
+    <div class="ml-auto flex gap-6 text-sm">
+      <div>
+        <span class="text-gray-400">Facturado en el período: </span>
+        <span class="font-bold text-emerald-600">${{ totalFacturadoPeriodo | number:'1.2-2' }}</span>
+      </div>
+      <div>
+        <span class="text-gray-400">Platos vendidos: </span>
+        <span class="font-bold text-gray-800">{{ totalPlatosPeriodo }}</span>
+      </div>
+    </div>
+  </div>
+
+  <p *ngIf="errorMessage" class="text-orange-600 text-sm mb-4">{{ errorMessage }}</p>
+
+  <!-- =======================================================
+       DESGLOSE POR MODALIDAD (decisión de negocio)
+       ======================================================= -->
+  <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm mb-8">
+    <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-4">Mezcla de Ventas por Modalidad</h3>
+    <div class="space-y-3">
+      <div *ngFor="let m of modalidades" class="flex items-center gap-4">
+        <span class="w-28 text-sm font-semibold text-gray-700 capitalize">{{ m.modalidad.replace('_', ' ') }}</span>
+        <div class="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
+          <div class="bg-indigo-500 h-3 rounded-full" [style.width.%]="m.porcentaje_del_total"></div>
+        </div>
+        <span class="w-16 text-right text-sm font-bold text-gray-800">{{ m.porcentaje_del_total }}%</span>
+        <span class="w-28 text-right text-xs text-gray-400 font-mono">${{ m.total_facturado | number:'1.2-2' }}</span>
+      </div>
+      <p *ngIf="modalidades.length === 0" class="text-xs text-gray-400">Sin ventas cobradas en el período seleccionado.</p>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       TABLA DE TURNOS
+       ======================================================= -->
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide p-5 pb-0">Detalle por Turno</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-xs font-bold text-gray-400 uppercase border-b border-gray-200">
+            <th class="px-5 py-3">Turno</th>
+            <th class="px-5 py-3">Apertura</th>
+            <th class="px-5 py-3">Estado</th>
+            <th class="px-5 py-3 text-center">Mesas Ocupadas</th>
+            <th class="px-5 py-3 text-center">Tickets</th>
+            <th class="px-5 py-3 text-center">Platos Vendidos</th>
+            <th class="px-5 py-3 text-right">Ticket Promedio</th>
+            <th class="px-5 py-3 text-right">Facturado</th>
+            <th class="px-5 py-3">Plato Estrella</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let t of turnos" class="hover:bg-gray-50">
+            <td class="px-5 py-3 font-semibold text-gray-700">#{{ t.turno_id }}</td>
+            <td class="px-5 py-3 text-gray-500">{{ t.fecha_apertura | date:'short' }}</td>
+            <td class="px-5 py-3">
+              <span class="px-2 py-0.5 rounded-full text-xs font-bold"
+                [ngClass]="t.estado === 'ABIERTO' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'">
+                {{ t.estado }}
+              </span>
+            </td>
+            <td class="px-5 py-3 text-center font-semibold">{{ t.mesas_ocupadas }}</td>
+            <td class="px-5 py-3 text-center">{{ t.volumen_ventas }}</td>
+            <td class="px-5 py-3 text-center">{{ t.cantidad_platos_vendidos }}</td>
+            <td class="px-5 py-3 text-right font-mono">${{ t.ticket_promedio | number:'1.2-2' }}</td>
+            <td class="px-5 py-3 text-right font-mono font-bold text-emerald-600">${{ t.total_facturado | number:'1.2-2' }}</td>
+            <td class="px-5 py-3 text-gray-600">{{ t.plato_estrella }}</td>
+          </tr>
+          <tr *ngIf="turnos.length === 0">
+            <td colspan="9" class="px-5 py-8 text-center text-gray-400 text-sm">No hay turnos en el rango seleccionado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
